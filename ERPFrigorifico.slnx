@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/Backend/">
+    <Project Path="ERPFrigorifico.API/ERPFrigorifico.API.csproj" />
+    <Project Path="ERPFrigorifico.Application/ERPFrigorifico.Application.csproj" Id="e3cff958-3e4e-4d48-84aa-2e8516b88aa1" />
+    <Project Path="ERPFrigorifico.Domain/ERPFrigorifico.Domain.csproj" Id="e369779c-84ed-4450-9c1f-a7eb4f43131c" />
+    <Project Path="ERPFrigorifico.Infrastructure/ERPFrigorifico.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/Frontend/" />
+</Solution>
