@@ -7,13 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.3.9" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\ERPFrigorifico.Domain\ERPFrigorifico.Domain.csproj" />
-    <ProjectReference Include="..\ERPFrigorifico.Shared\ERPFrigorifico.Shared.csproj" />
   </ItemGroup>
 
 </Project>

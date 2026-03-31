@@ -15,10 +15,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Controllers\" />
-	</ItemGroup>
-
-	<ItemGroup>
+		<ProjectReference Include="..\ERPFrigorifico.Application\ERPFrigorifico.Application.csproj" />
 		<ProjectReference Include="..\ERPFrigorifico.Domain\ERPFrigorifico.Domain.csproj" />
 		<ProjectReference Include="..\ERPFrigorifico.Infrastructure\ERPFrigorifico.Infrastructure.csproj" />
 	</ItemGroup>

@@ -4,12 +4,9 @@ using System.Text;
 
 namespace ERPFrigorifico.Domain.Enums
 {
-    public enum Estado
+    public enum TipoIngreso
     {
-        Excelente = 0,
-        Bueno = 1,
-        Medio = 2,
-        Malo = 3,
-        MuyMalo = 4
+        Interno,
+        Proveedor
     }
 }

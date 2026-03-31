@@ -9,7 +9,7 @@ namespace ERPFrigorifico.Domain.Entities
         public int Id { get; set; }
         public string Marca { get; set; } = null!;
         public string Modelo { get; set; } = null!;
-
+        public DateTime? EliminadoEn { get; set; }
         public List<Ingreso> Ingresos { get; set; } = new List<Ingreso>();
     }
 }
