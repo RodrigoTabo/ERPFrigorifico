@@ -12,7 +12,8 @@ namespace ERPFrigorifico.Domain.Entities
         public decimal PesoIngreso { get; set; }
         public int IngresoId { get; set; }
         public Ingreso Ingreso { get; set; } = null!;
-        public List<Faena> Faenas { get; set; } = new List<Faena>();
+        public int? FaenaId { get; set; }
+        public Faena? Faena { get; set; }
         public List<MovimientoAnimal> MovimientosAnimal { get; set; } = new List<MovimientoAnimal>();
 
     }

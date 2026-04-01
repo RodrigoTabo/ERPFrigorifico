@@ -16,12 +16,13 @@ namespace ERPFrigorifico.Infrastructure.Configurations
 
             //Propíedades
             b.Property(b => b.FechaProduccion).IsRequired();
-            b.Property(b => b.AnimalId).IsRequired();
-
-            //Indices
-            b.HasIndex(b => b.AnimalId);
 
             //FK
+            b.HasMany(b => b.Animales)
+                .WithOne(a => a.Faena)
+                .HasForeignKey(a => a.FaenaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             b.HasMany(b => b.Canales)
                 .WithOne(f => f.Faena)
                 .HasForeignKey(f => f.FaenaId)

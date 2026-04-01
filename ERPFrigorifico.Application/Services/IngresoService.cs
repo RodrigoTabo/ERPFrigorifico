@@ -72,7 +72,12 @@ namespace ERPFrigorifico.Application.Services
                 CantidadAnimales = request.cantidadAnimales,
             };
 
+            //Llamo al evento que genera los animales y su movimiento de ingreso,
+            //para que queden creados al momento de generar el ingreso.
+            GenerarAnimalesYMovimientos(ingreso);
+
             _ingresoRepository.AddIngreso(ingreso);
+
             await _unitOfWorkRepository.SaveChangesAsync();
 
             return ingreso.Id;
@@ -93,6 +98,38 @@ namespace ERPFrigorifico.Application.Services
 
 
         //Metodos privados para validaciones especificas de cada entidad.
+
+
+        //Creo los eventos que se deberian hacer automaticamente al generar el ingreso.
+        //De esta forma, al generar el ingreso, ya quedan creados los animales y su movimiento de ingreso.
+        private void GenerarAnimalesYMovimientos (Ingreso ingreso)
+        {
+            var pesoPromedio = ingreso.PesoNeto / ingreso.CantidadAnimales;
+
+            for (int i = 0; i < ingreso.CantidadAnimales; i++)
+            {
+                //Creo el animal
+                var animal = new Animal
+                {
+                    TipoAnimal = TipoAnimal.Vaca,
+                    IngresoId = ingreso.Id,
+                    PesoIngreso = pesoPromedio,
+                };
+
+                //Creo el movimiento del animal, que en este caso es el movimiento de ingreso
+                var movimientoIngreso = new MovimientoAnimal
+                {
+                    Animal = animal,
+                    FechaMovimiento = ingreso.FechaIngreso,
+                    TipoMovimiento = TipoMovimiento.Ingreso,
+                };
+
+                animal.MovimientosAnimal.Add(movimientoIngreso);
+                ingreso.Animales.Add(animal);
+            }
+
+        }
+
         private async Task ValidarProveedorAsync(int? proveedorId)
         {
             var proveedor = await _ingresoRepository.ObtenerProveedorAsync(proveedorId);

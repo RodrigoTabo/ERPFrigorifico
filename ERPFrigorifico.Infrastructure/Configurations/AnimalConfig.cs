@@ -17,13 +17,9 @@ namespace ERPFrigorifico.Infrastructure.Configurations
 
             //Indices
             b.HasIndex(b => b.IngresoId);
+            b.HasIndex(b => b.FaenaId);
 
             //FK
-            b.HasMany(b => b.Faenas)
-                .WithOne(a => a.Animal)
-                .HasForeignKey(a => a.AnimalId)
-                .OnDelete(DeleteBehavior.Restrict);
-
             b.HasMany(b => b.MovimientosAnimal)
                 .WithOne(a => a.Animal)
                 .HasForeignKey(a => a.AnimalId)

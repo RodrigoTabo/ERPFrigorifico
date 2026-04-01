@@ -9,6 +9,8 @@ namespace ERPFrigorifico.Domain.Entities
         public int Id { get; set; }
         public int FaenaId { get; set; }
         public Faena Faena { get; set; } = null!;
+        public int AnimalId { get; set; }
+        public Animal Animal { get; set; } = null!;
         public decimal Peso { get; set; }
         public List<Corte> Cortes { get; set; } = new List<Corte>();
     }
