@@ -1,5 +1,13 @@
 using ERPFrigorifico.Application.Interfaces;
+using ERPFrigorifico.Application.Interfaces.Animales;
+using ERPFrigorifico.Application.Interfaces.CamarasFrio;
+using ERPFrigorifico.Application.Interfaces.Canales;
+using ERPFrigorifico.Application.Interfaces.Corrales;
+using ERPFrigorifico.Application.Interfaces.Cortes;
+using ERPFrigorifico.Application.Interfaces.Faenas;
 using ERPFrigorifico.Application.Interfaces.Ingresos;
+using ERPFrigorifico.Application.Interfaces.MovimienosAnimal;
+using ERPFrigorifico.Application.Interfaces.Stocks;
 using ERPFrigorifico.Application.Services;
 using ERPFrigorifico.Infrastructure.Data;
 using ERPFrigorifico.Infrastructure.Repositories;
@@ -24,6 +32,18 @@ namespace ERPFrigorifico.API
             // SERVICIOS Y REPOSITORIOS DE LA APLICACION.
             builder.Services.AddScoped<IIngresoRepository, IngresoRepository>();
             builder.Services.AddScoped<IIngresoService, IngresoService>();
+            builder.Services.AddScoped<IAnimalRepository, AnimalRepository>();
+            builder.Services.AddScoped<ICamaraFrioRepository, CamaraFrioRepository>();
+            builder.Services.AddScoped<ICanalRepository, CanalRepository>();
+            builder.Services.AddScoped<ICanalService, CanalService>();
+            builder.Services.AddScoped<ICorralService, CorralService>();
+            builder.Services.AddScoped<ICorteRepository, CorteRepository>();
+            builder.Services.AddScoped<ICorteService, CorteService>();
+            builder.Services.AddScoped<IFaenaRepository, FaenaRepository>();
+            builder.Services.AddScoped<IFaenaService, FaenaService>();
+            builder.Services.AddScoped<IMovimientoAnimalRepository, MovimientoAnimalRepository>();
+            builder.Services.AddScoped<IStockRepository, StockRepository>();
+            builder.Services.AddScoped<IStockService, StockService>();
 
             // SERVICO DE LA CONEXION.
             builder.Services

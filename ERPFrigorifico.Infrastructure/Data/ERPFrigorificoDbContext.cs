@@ -16,6 +16,7 @@ namespace ERPFrigorifico.Infrastructure.Data
         public DbSet<CamaraFrio> CamarasFrio => Set<CamaraFrio>();
         public DbSet<Camion> Camiones => Set<Camion>();
         public DbSet<Corral> Corrales => Set<Corral>();
+        public DbSet<Canal> Canales => Set<Canal>();
         public DbSet<Corte> Cortes => Set<Corte>();
         public DbSet<Faena> Faenas => Set<Faena>();
         public DbSet<Ingreso> Ingresos => Set<Ingreso>();

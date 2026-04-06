@@ -9,9 +9,9 @@ namespace ERPFrigorifico.Domain.Entities
     {
         public int Id { get; set; }
         public int? CamionId { get; set; }
-        public Camion Camion { get; set; } = null!;
+        public Camion? Camion { get; set; } = null!;
         public int? OperarioId { get; set; }
-        public Operario Operario { get; set; } = null!;
+        public Operario? Operario { get; set; } = null!;
         public decimal PesoBruto { get; set; }
         public decimal PesoTara { get; set; }
         public decimal PesoNeto { get; set; }

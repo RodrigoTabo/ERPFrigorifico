@@ -22,20 +22,21 @@ namespace ERPFrigorifico.Application.Services
 
             var animales = await _animalRepository.GetByIds(animalIds);
 
-            if (animales.Count != animalIds.Count)
-                throw new NotFoundException("Algunos animales no existen");
+            validarExistenciaAnimales(animales, animalIds);
 
             var animalesEnIngreso = await _movimientoAnimalRepository
                 .GetAnimalesPorUltimoMovimiento(TipoMovimiento.Ingreso);
 
+            var animalYaEnCorral = await _movimientoAnimalRepository
+                .GetAnimalesPorUltimoMovimiento(TipoMovimiento.EntradaCorral);
+
             var animalesEnIngresoIds = animalesEnIngreso.Select(a => a.Id).ToList();
 
-            //Verificamos si hay algun animal que no este en ingreso
+            //Verificamos si hay algun animal que no este en ingreso, si ya se movio a corral, tambien sirve como filtro.
             var hayInvalidos = animalIds.Any(id => !animalesEnIngresoIds.Contains(id));
 
             //Si hay algun animal que no este en ingreso, lanzamos una excepcion
-            if (hayInvalidos)
-                throw new ConflictException("Algunos animales no están en ingreso");
+            validarAnimalesEnIngreso(hayInvalidos);
 
             foreach (var animal in animales)
             {
@@ -52,6 +53,18 @@ namespace ERPFrigorifico.Application.Services
 
             await _unitOfWorkRepository.SaveChangesAsync();
 
+        }
+
+        private void validarExistenciaAnimales(List<Animal> animales, List<int> animalIds)
+        {
+            if (animales.Count != animalIds.Count)
+                throw new NotFoundException("Algunos animales no existen");
+        }
+
+        private void validarAnimalesEnIngreso(bool hayInvalidos)
+        {
+            if (hayInvalidos)
+                throw new ConflictException("Algunos animales no están en ingreso");
         }
 
     }

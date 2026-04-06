@@ -16,7 +16,7 @@ namespace ERPFrigorifico.Infrastructure.Configurations
             b.HasKey(b => b.Id);
 
             //Propiedades
-            b.Property(b => b.PesoDisponible).IsRequired().HasPrecision(18, 2);
+            //b.Property(b => b.PesoDisponible).IsRequired().HasPrecision(18, 2);
             b.Property(b => b.CorteId).IsRequired();
             b.Property(b => b.CamaraFrioId).IsRequired();
 

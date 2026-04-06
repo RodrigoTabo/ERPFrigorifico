@@ -16,8 +16,9 @@ namespace ERPFrigorifico.Infrastructure.Repositories
         public async Task<List<Animal>> GetAnimalesPorUltimoMovimiento(TipoMovimiento tipo)
         {
             var animalesIds = await _context.MovimientosAnimal
-                .GroupBy(m => m.AnimalId)
-                .Select(g => g.OrderByDescending(m => m.FechaMovimiento).First())
+                .Where(m => m.FechaMovimiento == _context.MovimientosAnimal
+                    .Where(x => x.AnimalId == m.AnimalId)
+                    .Max(x => x.FechaMovimiento))
                 .Where(m => m.TipoMovimiento == tipo)
                 .Select(m => m.AnimalId)
                 .ToListAsync();

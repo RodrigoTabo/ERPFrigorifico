@@ -6,7 +6,7 @@ namespace ERPFrigorifico.Domain.Enums
 {
     public enum TipoIngreso
     {
-        Interno,
-        Proveedor
+        Interno = 0,
+        Proveedor = 1
     }
 }

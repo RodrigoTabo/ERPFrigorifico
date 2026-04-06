@@ -11,7 +11,7 @@ namespace ERPFrigorifico.Domain.Entities
         public Corte Corte { get; set; } = null!;
         public int CamaraFrioId { get; set; }
         public CamaraFrio CamaraFrio { get; set; } = null!;
-        public decimal PesoDisponible { get; set; }
+        public decimal Peso { get; set; }
 
     }
 }

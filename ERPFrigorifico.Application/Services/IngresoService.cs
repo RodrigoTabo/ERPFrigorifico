@@ -20,6 +20,7 @@ namespace ERPFrigorifico.Application.Services
             //_logger.LogInformation("Iniciando registro de ingreso de materia prima");
 
             //Validaciones generales para ambos tipos de ingreso.
+
             if (request.cantidadAnimales <= 0)
                 throw new BadRequestException("Debes asignar la cantidad de animales a ingresar.");
 
@@ -34,7 +35,6 @@ namespace ERPFrigorifico.Application.Services
             var pesoNeto = request.pesoBruto - request.pesoTara;
 
             await ValidarIngresoActivoPorPatente(request.patente);
-
 
             //Dependiendo el tipo de ingreso se validan los datos correspondientes.
             if (request.tipoIngreso == TipoIngreso.Interno)
@@ -102,7 +102,7 @@ namespace ERPFrigorifico.Application.Services
 
         //Creo los eventos que se deberian hacer automaticamente al generar el ingreso.
         //De esta forma, al generar el ingreso, ya quedan creados los animales y su movimiento de ingreso.
-        private void GenerarAnimalesYMovimientos (Ingreso ingreso)
+        private void GenerarAnimalesYMovimientos(Ingreso ingreso)
         {
             var pesoPromedio = ingreso.PesoNeto / ingreso.CantidadAnimales;
 

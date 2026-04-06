@@ -6,9 +6,10 @@ namespace ERPFrigorifico.Domain.Enums
 {
     public enum TipoCorte
     {
-        MediaRes = 0,
-        TapaNalga = 1,
-        Vacio = 2,
-        Asado = 3,
+        MediaResIzq = 0,
+        MediaResDer = 1,
+        TapaNalga = 2,
+        Vacio = 3,
+        Asado = 4,
     }
 }

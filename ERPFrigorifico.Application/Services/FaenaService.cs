@@ -23,8 +23,8 @@ namespace ERPFrigorifico.Application.Services
         {
             var animales = await _animalRepository.GetByIds(animalIds);
 
-            if (animales.Count != animalIds.Count)
-                throw new NotFoundException("Algunos animales no existen");
+            //Le mandamos los objetos animales y los animales seleccionados para poder validar si los animales existen.
+            ValidarAnimalExistente(animales, animalIds);
 
             var animalesEnCorral = await _movimientoAnimalRepository.GetAnimalesPorUltimoMovimiento(TipoMovimiento.EntradaCorral);
 
@@ -33,8 +33,7 @@ namespace ERPFrigorifico.Application.Services
             var hayInvalidos = animalIds.Any(id => !animalesEnCorralesIds.Contains(id));
 
             //Si hay algun animal que no este en corral, lanzamos una excepcion
-            if (hayInvalidos)
-                throw new ConflictException("Algunos animales no están en corral");
+            ValidarAnimalesEnCorral(hayInvalidos);
 
             var faena = new Faena
             {
@@ -62,27 +61,21 @@ namespace ERPFrigorifico.Application.Services
         {
             var existeFaena = await ValidarFaenaExistente(faenaId);
 
-            if (existeFaena.Canales.Any())
-                throw new ConflictException("La faena ya fue procesada");
+            ValidarFaenaProcesada(existeFaena);
 
-            await ValidarFaenaTieneAnimal(existeFaena);
+            ValidarFaenaTieneAnimal(existeFaena);
 
             foreach (var animal in existeFaena.Animales)
             {
 
-                var canalIzq = new Canal
+                var canal = new Canal
                 {
                     AnimalId = animal.Id,
-                    FaenaId = existeFaena.Id
-                };
-                var canalDer = new Canal
-                {
-                    AnimalId = animal.Id,
-                    FaenaId = existeFaena.Id
+                    FaenaId = existeFaena.Id,
+                    Peso = animal.PesoIngreso
                 };
 
-                existeFaena.Canales.Add(canalIzq);
-                existeFaena.Canales.Add(canalDer);
+                existeFaena.Canales.Add(canal);
 
             }
             await _unitOfWorkRepository.SaveChangesAsync();
@@ -90,6 +83,12 @@ namespace ERPFrigorifico.Application.Services
 
 
         // Metodos Privados de validacion.
+        private void ValidarAnimalExistente(List<Animal> animales, List<int> animalIds)
+        {
+            if (animales.Count != animalIds.Count)
+                throw new NotFoundException("Algunos animales no existen");
+        }
+
         private async Task<Faena> ValidarFaenaExistente(int faenaId)
         {
             var faena = await _faenaRepository.GetFaenaById(faenaId);
@@ -100,10 +99,22 @@ namespace ERPFrigorifico.Application.Services
             return faena;
         }
 
-        private async Task ValidarFaenaTieneAnimal(Faena faena)
+        private void ValidarFaenaProcesada(Faena existeFaena)
+        {
+            if (existeFaena.Canales.Any())
+                throw new ConflictException("La faena ya fue procesada");
+        }
+
+        private void ValidarFaenaTieneAnimal(Faena faena)
         {
             if (faena.Animales == null || !faena.Animales.Any())
                 throw new ConflictException("La faena no tiene animales asociados");
+        }
+
+        private void ValidarAnimalesEnCorral(bool hayInvalidos)
+        {
+            if (hayInvalidos)
+                throw new ConflictException("Algunos animales no están en corral");
         }
     }
 }

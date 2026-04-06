@@ -16,8 +16,6 @@ namespace ERPFrigorifico.Infrastructure.Configurations
             b.Property(b => b.PesoNeto).IsRequired().HasPrecision(18, 2);
             b.Property(b => b.PesoTara).IsRequired().HasPrecision(18, 2);
             b.Property(b => b.FechaIngreso).IsRequired();
-            b.Property(b => b.CamionId).IsRequired();
-            b.Property(b => b.OperarioId).IsRequired();
 
             //Indices
             b.HasIndex(b => b.ProveedorId);

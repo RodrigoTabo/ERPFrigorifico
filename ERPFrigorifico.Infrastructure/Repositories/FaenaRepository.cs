@@ -15,6 +15,7 @@ namespace ERPFrigorifico.Infrastructure.Repositories
         {
             var faena = _context.Faenas
                 .Include(f => f.Animales)
+                .Include(c => c.Canales)
                 .FirstOrDefault(f => f.Id == faenaId);
 
             return faena;

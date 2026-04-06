@@ -6,8 +6,9 @@ namespace ERPFrigorifico.API.Controllers
 {
     [ApiController]
     [Route("api/Ingresos")]
-    public class IngresoController(IIngresoService ingresoService) : Controller
+    public class IngresoController(IIngresoService ingresoService) : ControllerBase
     {
+
         private readonly IIngresoService _ingresoService = ingresoService;
 
         [HttpPost]
@@ -20,13 +21,14 @@ namespace ERPFrigorifico.API.Controllers
 
             return Created($"api/Ingresos/{id}", request);
         }
+
         [HttpPost("salida")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> RegistrarSalida(string patente)
+        public async Task<IActionResult> RegistrarSalida([FromQuery]string patente)
         {
             await _ingresoService.RegistrarSalidaAsync(patente);
-            return Ok();
+            return Ok("La salida se ha registrado exitosamente.");
         }
 
     }

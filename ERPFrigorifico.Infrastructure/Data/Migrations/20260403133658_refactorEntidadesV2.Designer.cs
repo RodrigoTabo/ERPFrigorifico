@@ -4,6 +4,7 @@ using ERPFrigorifico.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ERPFrigorifico.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ERPFrigorificoDbContext))]
-    partial class ERPFrigorificoDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260403133658_refactorEntidadesV2")]
+    partial class refactorEntidadesV2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -194,7 +197,7 @@ namespace ERPFrigorifico.Infrastructure.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("CamionId")
+                    b.Property<int>("CamionId")
                         .HasColumnType("int");
 
                     b.Property<int>("CantidadAnimales")
@@ -206,7 +209,7 @@ namespace ERPFrigorifico.Infrastructure.Data.Migrations
                     b.Property<DateTime?>("FechaSalida")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("OperarioId")
+                    b.Property<int>("OperarioId")
                         .HasColumnType("int");
 
                     b.Property<string>("Patente")
@@ -366,7 +369,8 @@ namespace ERPFrigorifico.Infrastructure.Data.Migrations
                     b.Property<int>("CorteId")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("Peso")
+                    b.Property<decimal>("PesoDisponible")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
@@ -631,12 +635,14 @@ namespace ERPFrigorifico.Infrastructure.Data.Migrations
                     b.HasOne("ERPFrigorifico.Domain.Entities.Camion", "Camion")
                         .WithMany("Ingresos")
                         .HasForeignKey("CamionId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("ERPFrigorifico.Domain.Entities.Operario", "Operario")
                         .WithMany("Ingresos")
                         .HasForeignKey("OperarioId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("ERPFrigorifico.Domain.Entities.Proveedor", "Proveedor")
                         .WithMany("Ingresos")
