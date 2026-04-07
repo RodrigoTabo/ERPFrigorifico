@@ -5,7 +5,9 @@
     <Project Path="ERPFrigorifico.Domain/ERPFrigorifico.Domain.csproj" Id="e369779c-84ed-4450-9c1f-a7eb4f43131c" />
     <Project Path="ERPFrigorifico.Infrastructure/ERPFrigorifico.Infrastructure.csproj" />
   </Folder>
-  <Folder Name="/Frontend/" />
+  <Folder Name="/Frontend/">
+    <Project Path="ERPFrigorifico.Client/ERPFrigorifico.Client.csproj" Id="94c8b097-ccdc-4dce-b6b8-d823712edfd0" />
+  </Folder>
   <Project Path="ERPFrigorifico.Shared/ERPFrigorifico.Shared.csproj" Id="4996aa58-b826-46fb-a7ae-8503f65dd646" />
   <Project Path="ERPFrigorifico.TestxUnitApi/ERPFrigorifico.TestxUnitApi.csproj" Id="c3a0fb6c-5bdd-4af0-a962-4b2dd40d46cb" />
 </Solution>
