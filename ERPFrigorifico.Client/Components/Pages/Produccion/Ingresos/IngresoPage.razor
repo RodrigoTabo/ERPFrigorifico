@@ -1,0 +1,68 @@
+﻿@page "/ingresos"
+@using ERPFrigorifico.Client.ApiClients
+@using ERPFrigorifico.Client.Components.Pages.Produccion.Components
+@using ERPFrigorifico.Client.Extensiones
+@using ERPFrigorifico.Shared.DTOs.Ingresos
+@inject IngresoApi ingresoApi
+@rendermode InteractiveServer
+@inject IDialogService DialogService
+@layout MainLayout
+
+<MudGrid>
+    <MudItem xs="12" md="4">
+        <IngresoForm />
+    </MudItem>
+
+    <MudItem xs="12" md="8">
+        <MudPaper Class="pa-4" Elevation="2" Style="border-radius:5px;">
+            <IngresoActivoCard Items="@GetIngresosActivos" Loading="Loading" OnMarcarSalido="ConfirmSalido" />
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@code {
+
+    private List<IngresoListadoResponse> GetIngresosActivos = new();
+    private bool Loading;
+    private string? Error;
+
+    protected override async Task OnInitializedAsync()
+     => await LoadIngresosActivos();
+
+    private async Task LoadIngresosActivos()
+    {
+        Loading = true;
+        Error = null;
+
+        try
+        {
+            GetIngresosActivos = await ingresoApi.GetIngresosActivos();
+        }
+        catch (HttpApiException ex)
+        {
+            Error = ex.Message;
+        }
+        finally
+        {
+            Loading = false;
+        }
+
+    }
+
+
+    private async Task ConfirmSalido(IngresoListadoResponse marcarSalido)
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        var parameters = new DialogParameters
+        {
+            ["Patente"] = marcarSalido.Patente,
+        };
+
+        var dialog = await DialogService.ShowAsync<IngresoMarcarSalidaDialog>("Salida", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+            await OnInitializedAsync();
+    }
+
+}

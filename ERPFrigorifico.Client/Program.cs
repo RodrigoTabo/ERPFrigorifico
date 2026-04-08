@@ -1,3 +1,4 @@
+using ERPFrigorifico.Client.ApiClients;
 using ERPFrigorifico.Client.Components;
 using MudBlazor.Services;
 
@@ -9,16 +10,26 @@ namespace ERPFrigorifico.Client
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Services.AddMudServices();
+
             // Add services to the container.
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
 
-            builder.Services.AddMudServices();
+            builder.Services.AddRazorComponents()
+                .AddInteractiveServerComponents(options =>
+                {
+                    options.DetailedErrors = true;
+                });
 
-            builder.Services.AddHttpClient("ApiCliente", client =>
+            builder.Services.AddHttpClient("Api", client =>
             {
-                client.BaseAddress = new Uri("https://localhost:44313/");
+                client.BaseAddress = new Uri("https://localhost:7104/");
             });
+
+
+            builder.Services.AddScoped<IngresoApi>();
+            builder.Services.AddScoped<ProveedorApi>();
 
             var app = builder.Build();
 

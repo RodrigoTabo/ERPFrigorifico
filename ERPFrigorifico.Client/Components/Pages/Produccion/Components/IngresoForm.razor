@@ -1,0 +1,154 @@
+﻿@using ERPFrigorifico.Client.ApiClients
+@using ERPFrigorifico.Client.Extensiones
+@using ERPFrigorifico.Shared.DTOs.Proveedor
+@using ERPFrigorifico.Shared.Enums
+@using ERPFrigorifico.Shared.DTOs.Ingresos
+@inject IngresoApi ingresoApi
+@inject ProveedorApi proveedorApi
+@rendermode InteractiveServer
+
+<MudGrid>
+    <MudItem xs="12" sm="0">
+        <MudPaper Class="pa-4">
+            <MudForm>
+                <div class="d-flex">
+                    <MudRadioGroup T="TipoIngreso" @bind-Value="modelo.tipoIngreso">
+                        <MudRadio Value="@TipoIngreso.Interno" Color="Color.Primary">
+                            Interno (Operario y Camión Propio)
+                        </MudRadio>
+                        <MudRadio Value="@TipoIngreso.Proveedor" Color="Color.Primary">
+                            Externo (Proveedor)
+                        </MudRadio>
+                    </MudRadioGroup>
+                </div>
+
+                <MudSelect T="int?" Label="Seleccionar Operario"
+                           @bind-Value="modelo.OperarioId"
+                           Disabled="@(modelo.tipoIngreso != TipoIngreso.Interno)"
+                           Required="@(modelo.tipoIngreso == TipoIngreso.Interno)">
+                    @foreach (var p in proovedor)
+                    {
+                        <MudSelectItem Value="@p.Id">@p.Nombre</MudSelectItem>
+                    }
+                </MudSelect>
+
+                <MudSelect T="int?" Label="Seleccionar Proveedor"
+                           @bind-Value="modelo.ProveedorId"
+                           Disabled="@(modelo.tipoIngreso != TipoIngreso.Proveedor)"
+                           Required="@(modelo.tipoIngreso == TipoIngreso.Proveedor)">
+                    @foreach (var p in proovedor)
+                    {
+                        <MudSelectItem Value="@((int?)p.Id)">
+                            @p.Nombre
+                        </MudSelectItem>
+                    }
+                </MudSelect>
+
+                <MudTextField T="string" @bind-Value="modelo.Patente" Label="Patente" Variant="Variant.Outlined" />
+                <MudTextField T="int" @bind-Value="modelo.CantidadAnimales" Label="Cantidad de animales (Numero)" Variant="Variant.Outlined" />
+                <MudNumericField T="decimal" @bind-Value="modelo.PesoBruto" Label="Peso Bruto (KG)" Variant="Variant.Outlined" />
+                <MudNumericField T="decimal" @bind-Value="modelo.PesoTara" Label="Peso Tara (KG)" Variant="Variant.Outlined" />
+                <MudText Typo="Typo.h6" Class="mt-2">Neto: @(modelo.PesoBruto - modelo.PesoTara) KG</MudText>
+
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           OnClick="Ingresar"
+                           Disabled="Guardando"
+                           Class="mt-4">
+                    @(Guardando ? "Procesando..." : "Registrar Ingreso")
+                </MudButton>
+
+                @if (Error != null)
+                {
+                    <MudText Color="Color.Error" Class="mt-2">@Error</MudText>
+                }
+            </MudForm>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+@code {
+
+    //Ingreso
+    private RegistrarIngresoRequest modelo = new();
+    private bool Guardando;
+    private string? Error;
+
+    //Proveedor
+    private List<ProveedorResponse> proovedor = new();
+    private bool GuardandoProveedor;
+    private string? ErrorProovedor;
+
+    //Tengo que llamar a la lista de camiones, operarios y proveedores desde el servicio para poder hacer el llamado aca asi cargo el proceso.
+    protected override async Task OnInitializedAsync()
+    {
+        // await LoadCamionIdAsync();
+        // await LoadOperarioIdAsync();
+        await LoadProveedorIdAsync();
+    }
+
+    private async Task LoadProveedorIdAsync()
+    {
+        GuardandoProveedor = true;
+        ErrorProovedor = null;
+
+        try
+        {
+            var lista = await proveedorApi.GetAll();
+
+            proovedor = lista.ToList();
+        }
+        catch (HttpApiException ex)
+        {
+            ErrorProovedor = ex.Message;
+        }
+        finally
+        {
+            GuardandoProveedor = false;
+        }
+    }
+
+    private async Task Ingresar()
+    {
+        Guardando = true;
+        Error = null;
+
+        if (string.IsNullOrWhiteSpace(modelo.Patente))
+            Error = "Debes cargar una patente.";
+        if (modelo.CantidadAnimales <= 0)
+            Error = "Debes cargar la cantidad de animales a ingresar.";
+        if (modelo.PesoBruto <= 0)
+            Error = "Debes cargar el peso bruto en kilos.";
+        if (modelo.PesoTara <= 0)
+            Error = "Debes cargar el peso tara en kilos.";
+        if (modelo.tipoIngreso < 0)
+            Error = "Debes elegir el tipo de ingreso.";
+
+        try
+        {
+            var request = new RegistrarIngresoRequest
+            {
+                CamionId = modelo.CamionId,
+                OperarioId = modelo.OperarioId,
+                ProveedorId = modelo.ProveedorId,
+                PesoBruto = modelo.PesoBruto,
+                PesoTara = modelo.PesoTara,
+                CantidadAnimales = modelo.CantidadAnimales,
+                Patente = modelo.Patente,
+                tipoIngreso = TipoIngreso.Proveedor
+            };
+
+            await ingresoApi.RegistrarIngreso(request);
+
+        }
+        catch (HttpApiException ex)
+        {
+            Error = ex.Message;
+        }
+        finally
+        {
+            Guardando = false;
+        }
+
+    }
+
+}

@@ -1,4 +1,4 @@
-﻿using ERPFrigorifico.Domain.Enums;
+﻿using ERPFrigorifico.Shared.Enums;
 using System;
 using System.Collections.Generic;
 using System.Text;

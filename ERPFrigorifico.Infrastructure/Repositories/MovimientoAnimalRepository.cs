@@ -1,7 +1,7 @@
 ﻿using ERPFrigorifico.Application.Interfaces.MovimienosAnimal;
 using ERPFrigorifico.Domain.Entities;
-using ERPFrigorifico.Domain.Enums;
 using ERPFrigorifico.Infrastructure.Data;
+using ERPFrigorifico.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace ERPFrigorifico.Infrastructure.Repositories

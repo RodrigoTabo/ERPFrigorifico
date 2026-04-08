@@ -1,4 +1,5 @@
 ﻿using ERPFrigorifico.Domain.Entities;
+using ERPFrigorifico.Shared.DTOs.Ingresos;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -30,5 +31,9 @@ namespace ERPFrigorifico.Application.Interfaces.Ingresos
         /// Obtener objeto proveedor por ID
         /// </summary>
         Task<Proveedor?> ObtenerProveedorAsync(int? id);
+        /// <summary>
+        /// Obtener lista de ingresos Activos
+        /// </summary>
+        Task<List<IngresoListadoResponse>> ListarIngresosActivos();
     }
 }

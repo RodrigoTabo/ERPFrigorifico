@@ -2,8 +2,8 @@
 using ERPFrigorifico.Application.Interfaces;
 using ERPFrigorifico.Application.Interfaces.Ingresos;
 using ERPFrigorifico.Domain.Entities;
-using ERPFrigorifico.Domain.Enums;
 using ERPFrigorifico.Shared.DTOs.Ingresos;
+using ERPFrigorifico.Shared.Enums;
 
 namespace ERPFrigorifico.Application.Services
 {
@@ -21,55 +21,55 @@ namespace ERPFrigorifico.Application.Services
 
             //Validaciones generales para ambos tipos de ingreso.
 
-            if (request.cantidadAnimales <= 0)
+            if (request.CantidadAnimales <= 0)
                 throw new BadRequestException("Debes asignar la cantidad de animales a ingresar.");
 
-            if (string.IsNullOrWhiteSpace(request.patente))
+            if (string.IsNullOrWhiteSpace(request.Patente))
                 throw new BadRequestException("La patente es obligatoria.");
 
-            if (request.pesoBruto <= request.pesoTara)
+            if (request.PesoBruto <= request.PesoTara)
                 throw new BadRequestException("El peso bruto debe ser mayor al peso tara.");
 
-            ValidarPesos(request.pesoTara, request.pesoBruto);
+            ValidarPesos(request.PesoTara, request.PesoBruto);
 
-            var pesoNeto = request.pesoBruto - request.pesoTara;
+            var pesoNeto = request.PesoBruto - request.PesoTara;
 
-            await ValidarIngresoActivoPorPatente(request.patente);
+            await ValidarIngresoActivoPorPatente(request.Patente);
 
             //Dependiendo el tipo de ingreso se validan los datos correspondientes.
             if (request.tipoIngreso == TipoIngreso.Interno)
             {
 
-                if (request.operarioId == null)
+                if (request.OperarioId == null)
                     throw new BadRequestException("El operario es obligatorio.");
-                if (request.camionId == null)
+                if (request.CamionId == null)
                     throw new BadRequestException("El camion es obligatorio.");
 
-                await ValidarCamionAsync(request.camionId);
-                await ValidarOperarioAsync(request.operarioId);
+                await ValidarCamionAsync(request.CamionId);
+                await ValidarOperarioAsync(request.OperarioId);
             }
             else if (request.tipoIngreso == TipoIngreso.Proveedor)
             {
 
-                if (request.proveedorId == null)
+                if (request.ProveedorId == null)
                     throw new BadRequestException("El proveedor es obligatorio.");
 
-                await ValidarProveedorAsync(request.proveedorId);
+                await ValidarProveedorAsync(request.ProveedorId);
 
             }
 
             var ingreso = new Ingreso
             {
                 TipoIngreso = request.tipoIngreso,
-                ProveedorId = request.proveedorId,
-                CamionId = request.camionId,
-                OperarioId = request.operarioId,
-                PesoBruto = request.pesoBruto,
-                PesoTara = request.pesoTara,
+                ProveedorId = request.ProveedorId,
+                CamionId = request.CamionId,
+                OperarioId = request.OperarioId,
+                PesoBruto = request.PesoBruto,
+                PesoTara = request.PesoTara,
                 PesoNeto = pesoNeto,
-                Patente = request.patente,
+                Patente = request.Patente,
                 FechaIngreso = DateTime.UtcNow,
-                CantidadAnimales = request.cantidadAnimales,
+                CantidadAnimales = request.CantidadAnimales,
             };
 
             //Llamo al evento que genera los animales y su movimiento de ingreso,
@@ -95,6 +95,9 @@ namespace ERPFrigorifico.Application.Services
 
             await _unitOfWorkRepository.SaveChangesAsync();
         }
+
+        public async Task<List<IngresoListadoResponse>> ListarIngresosActivos()
+            => await _ingresoRepository.ListarIngresosActivos();
 
 
         //Metodos privados para validaciones especificas de cada entidad.

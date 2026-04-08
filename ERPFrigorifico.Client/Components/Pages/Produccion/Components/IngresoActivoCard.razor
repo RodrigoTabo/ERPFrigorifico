@@ -1,0 +1,63 @@
+﻿@using ERPFrigorifico.Shared.DTOs.Ingresos
+@using ERPFrigorifico.Shared.Enums
+@rendermode InteractiveServer
+
+<MudCard elevation="0" Style="border-radius: 5px;">
+    <MudCardContent>
+        <MudStack Row="true" Spacing="2" Class="px-4 py-2 grey lighten-4 rounded-t-lg" AlignItems="AlignItems.Center">
+            <MudText Typo="Typo.subtitle2" Style="width: 25%;"><b>Nombre</b></MudText>
+            <MudText Typo="Typo.subtitle2" Style="width: 15%;"><b>Patente</b></MudText>
+            <MudText Typo="Typo.subtitle2" Style="width: 15%;"><b>Ingreso</b></MudText>
+            <MudText Typo="Typo.subtitle2" Style="width: 10%;"><b>Tiempo</b></MudText>
+            <MudText Typo="Typo.subtitle2" Style="width: 15%;"><b>Tipo</b></MudText>
+            <MudText Typo="Typo.subtitle2" Style="width: 20%;" Align="Align.Center"><b>Acciones</b></MudText>
+        </MudStack>
+        <MudDivider />
+
+        <MudStack Spacing="0">
+            @foreach (var item in Items)
+            {
+                <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center" Class="w-100 px-4 py-2 hover-effect">
+                    
+                    <MudText Typo="Typo.body2" Style="width: 25%;" Class="text-truncate">@item.Nombre</MudText>
+                    
+                    <MudText Typo="Typo.body2" Style="width: 15%;">@item.Patente</MudText>
+                    
+                    <MudText Typo="Typo.body2" Style="width: 15%;">@item.FechaIngreso.ToString("dd/MM HH:mm")</MudText>
+                    
+                    <MudText Typo="Typo.body2" Style="width: 10%;">@item.MinutosEnPlanta min</MudText>
+                    
+                    <div style="width: 15%;">
+                        <MudChip T="string"
+                                 Size="Size.Small"
+                                 Variant="Variant.Text"
+                                 Color="Color.Primary">
+                            @(item.TipoIngreso == TipoIngreso.Interno ? "Interno" : "Proveedor")
+                        </MudChip>
+                    </div>
+                    <div style="width: 20%; display: flex; justify-content: center;">
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   Size="Size.Small" 
+                                   OnClick="@(() => OnMarcarSalido.InvokeAsync(item))">
+                            Marcar Salida
+                        </MudButton>
+                    </div>
+
+                </MudStack>
+                <MudDivider />
+            }
+        </MudStack>
+    </MudCardContent>
+</MudCard>
+@code {
+
+    [Parameter]
+    public List<IngresoListadoResponse> Items { get; set; } = new();
+    [Parameter]
+    public EventCallback<IngresoListadoResponse> OnMarcarSalido { get; set; }
+
+    [Parameter]
+    public bool Loading { get; set; }
+
+}

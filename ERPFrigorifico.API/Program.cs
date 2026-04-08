@@ -7,6 +7,7 @@ using ERPFrigorifico.Application.Interfaces.Cortes;
 using ERPFrigorifico.Application.Interfaces.Faenas;
 using ERPFrigorifico.Application.Interfaces.Ingresos;
 using ERPFrigorifico.Application.Interfaces.MovimienosAnimal;
+using ERPFrigorifico.Application.Interfaces.Proveedores;
 using ERPFrigorifico.Application.Interfaces.Stocks;
 using ERPFrigorifico.Application.Services;
 using ERPFrigorifico.Infrastructure.Data;
@@ -44,11 +45,13 @@ namespace ERPFrigorifico.API
             builder.Services.AddScoped<IMovimientoAnimalRepository, MovimientoAnimalRepository>();
             builder.Services.AddScoped<IStockRepository, StockRepository>();
             builder.Services.AddScoped<IStockService, StockService>();
+            builder.Services.AddScoped<IProveedorRepository, ProveedorRepository>();
+            builder.Services.AddScoped<IProveedorService, ProveedorService>();
 
             // SERVICO DE LA CONEXION.
             builder.Services
                 .AddDbContext<ERPFrigorificoDbContext>(options => options
-                .UseSqlServer(builder.Configuration.GetConnectionString("MarketplaceDbContext")));
+                .UseSqlServer(builder.Configuration.GetConnectionString("ERPFrigorificoDbContext")));
 
             builder.Services.AddScoped<IUnitOfWorkRepository, UnitOfWorkRepository>();
 
@@ -78,7 +81,6 @@ namespace ERPFrigorifico.API
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
-
 
             app.MapControllers();
 

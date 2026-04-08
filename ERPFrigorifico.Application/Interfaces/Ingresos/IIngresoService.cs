@@ -11,5 +11,7 @@ namespace ERPFrigorifico.Application.Interfaces.Ingresos
 
         Task RegistrarSalidaAsync(string patente);
 
+        Task<List<IngresoListadoResponse>> ListarIngresosActivos();
+
     }
 }

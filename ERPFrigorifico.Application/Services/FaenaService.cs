@@ -4,7 +4,7 @@ using ERPFrigorifico.Application.Interfaces.Animales;
 using ERPFrigorifico.Application.Interfaces.Faenas;
 using ERPFrigorifico.Application.Interfaces.MovimienosAnimal;
 using ERPFrigorifico.Domain.Entities;
-using ERPFrigorifico.Domain.Enums;
+using ERPFrigorifico.Shared.Enums;
 
 namespace ERPFrigorifico.Application.Services
 {

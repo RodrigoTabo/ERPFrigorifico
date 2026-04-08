@@ -1,7 +1,4 @@
-﻿using ERPFrigorifico.Domain.Enums;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using ERPFrigorifico.Shared.Enums;
 
 namespace ERPFrigorifico.Domain.Entities
 {

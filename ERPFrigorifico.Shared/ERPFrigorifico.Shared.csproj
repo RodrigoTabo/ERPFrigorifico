@@ -6,8 +6,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\ERPFrigorifico.Domain\ERPFrigorifico.Domain.csproj" />
-  </ItemGroup>
-
 </Project>

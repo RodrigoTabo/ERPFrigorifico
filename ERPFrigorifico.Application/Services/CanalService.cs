@@ -2,7 +2,7 @@
 using ERPFrigorifico.Application.Interfaces;
 using ERPFrigorifico.Application.Interfaces.Canales;
 using ERPFrigorifico.Domain.Entities;
-using ERPFrigorifico.Domain.Enums;
+using ERPFrigorifico.Shared.Enums;
 
 
 namespace ERPFrigorifico.Application.Services

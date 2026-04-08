@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ERPFrigorifico.Domain.Enums
+namespace ERPFrigorifico.Shared.Enums
 {
     public enum TipoAnimal
     {

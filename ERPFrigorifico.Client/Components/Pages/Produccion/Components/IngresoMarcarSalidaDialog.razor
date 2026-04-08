@@ -1,0 +1,56 @@
+﻿@using ERPFrigorifico.Client.ApiClients
+@using ERPFrigorifico.Client.Extensiones
+@inject IngresoApi ingresoApi
+@rendermode InteractiveServer
+
+<MudDialog>
+    <TitleContent>
+        Marcar salida
+    </TitleContent>
+    <DialogContent>
+        ¿Estas seguro que quieres dar MARCAR como SALIDO a este Operario/Proveedor?
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="MarcarSalida">OK</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public string? Patente { get; set; }
+    private string? Error;
+    private bool Guardando;
+
+    public async Task MarcarSalida()
+    {
+        Error = null;
+
+        if (string.IsNullOrWhiteSpace(Patente))
+        {
+            Error = "El Ingreso no existe.";
+            return;
+        }
+
+        Guardando = true;
+
+        try
+        {
+            await ingresoApi.RegistrarSalida(Patente);
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        catch (HttpApiException ex)
+        {
+            Error = ex.Message;
+        }
+        finally
+        {
+            Guardando = false;
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}
