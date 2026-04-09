@@ -42,6 +42,7 @@ namespace ERPFrigorifico.API
             builder.Services.AddScoped<ICorteService, CorteService>();
             builder.Services.AddScoped<IFaenaRepository, FaenaRepository>();
             builder.Services.AddScoped<IFaenaService, FaenaService>();
+            builder.Services.AddScoped<IMovimientoAnimalService, MovimientoAnimalService>();
             builder.Services.AddScoped<IMovimientoAnimalRepository, MovimientoAnimalRepository>();
             builder.Services.AddScoped<IStockRepository, StockRepository>();
             builder.Services.AddScoped<IStockService, StockService>();

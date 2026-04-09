@@ -1,0 +1,107 @@
+﻿@using ERPFrigorifico.Client.ApiClients
+@inject MovimientoAnimalApi movimientoAnimalApi
+@using ERPFrigorifico.Client.Extensiones
+@using ERPFrigorifico.Shared.DTOs.MovimientosAnimales
+@using ERPFrigorifico.Shared.Enums
+@rendermode InteractiveServer
+@using MudBlazor
+
+<MudCard elevation="0" Style="border-radius: 5px;">
+    <MudCardContent>
+
+        <div class="pa-4">
+            <MudSelect T="TipoMovimiento?" Label="Filtrar por Tipo" Value="tipoMovimiento" ValueChanged="OnFiltroChanged" Clearable="true"
+                       Placeholder="Todos los movimientos">
+                @foreach (TipoMovimiento tipo in Enum.GetValues(typeof(TipoMovimiento)))
+                {
+                    <MudSelectItem Value="@((TipoMovimiento?)tipo)">@tipo.ToString()</MudSelectItem>
+                }
+            </MudSelect>
+        </div>
+
+        <MudTable ServerData="@(new Func<TableState, CancellationToken, Task<TableData<MovimientoAnimalResponse>>>(TableData))"
+                  Hover="true" Dense="true" Elevation="0" @ref="Table" Loading="@Loading">
+
+            <HeaderContent>
+                <MudTh>Fecha</MudTh>
+                <MudTh>Estado</MudTh>
+                <MudTh Style="text-align:center">Acciones</MudTh>
+            </HeaderContent>
+
+            <RowTemplate>
+                <MudTd DataLabel="Fecha">@context.FechaMovimiento.ToString("dd/MM/yyyy HH:mm")</MudTd>
+                <MudTd DataLabel="Estado">
+                    <MudChip T="string"
+                             Color="@GetColor(context.tipoMovimiento)"
+                             Size="Size.Small"
+                             Variant="Variant.Text">
+                        @(context.tipoMovimiento switch
+                        {
+                            TipoMovimiento.Ingreso => "Recién ingresado",
+                            TipoMovimiento.EntradaCorral when context.CorralId > 0 => "En Corral",
+                            TipoMovimiento.Faena when context.FaenaId > 0 => "En Faena",
+                            TipoMovimiento.SalidaCorral => "Saliendo del corral",
+                            TipoMovimiento m => m.ToString(),
+                            _ => "Movimiento Nulo"
+                        })
+                    </MudChip>
+                </MudTd>
+                <MudTd DataLabel="Acciones" Style="text-align:center">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small">
+                        Marcar Salida
+                    </MudButton>
+                </MudTd>
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager RowsPerPageString="Registros por página:" />
+            </PagerContent>
+        </MudTable>
+    </MudCardContent>
+</MudCard>
+
+@code {
+
+    private MudTable<MovimientoAnimalResponse> Table;
+    private TipoMovimiento? tipoMovimiento;
+    private bool Loading;
+    private string? Error;
+
+    private async Task<TableData<MovimientoAnimalResponse>> TableData(TableState state, CancellationToken token)
+    {
+        Loading = true;
+        try
+        {
+            var resultado = await movimientoAnimalApi.GetAllMovimientosAnimales(state.Page, state.PageSize, tipoMovimiento);
+
+            return new TableData<MovimientoAnimalResponse>()
+            {
+                TotalItems = resultado.TotalCount,
+                Items = resultado.Items
+            };
+        }
+        catch (HttpApiException ex)
+        {
+            Error = ex.Message;
+            return new TableData<MovimientoAnimalResponse>() { Items = new List<MovimientoAnimalResponse>(), TotalItems = 0 };
+        }
+        finally
+        {
+            Loading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task OnFiltroChanged(TipoMovimiento? nuevoTipo)
+    {
+        tipoMovimiento = nuevoTipo;
+        // Esto reinicia la tabla a la pagina 0 y llama a ReloadData
+        await Table.ReloadServerData();
+    }
+
+    private Color GetColor(TipoMovimiento? tipo) => tipo switch
+    {
+        TipoMovimiento.Ingreso => Color.Info,
+        TipoMovimiento.EntradaCorral => Color.Success,
+        _ => Color.Error
+    };
+}
