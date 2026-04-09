@@ -1,10 +1,12 @@
 ﻿@using ERPFrigorifico.Client.ApiClients
 @using ERPFrigorifico.Client.Extensiones
+@using ERPFrigorifico.Shared.DTOs.Operario
 @using ERPFrigorifico.Shared.DTOs.Proveedor
 @using ERPFrigorifico.Shared.Enums
 @using ERPFrigorifico.Shared.DTOs.Ingresos
 @inject IngresoApi ingresoApi
 @inject ProveedorApi proveedorApi
+@inject OperarioApi operarioApi
 @rendermode InteractiveServer
 
 <MudGrid>
@@ -26,9 +28,9 @@
                            @bind-Value="modelo.OperarioId"
                            Disabled="@(modelo.tipoIngreso != TipoIngreso.Interno)"
                            Required="@(modelo.tipoIngreso == TipoIngreso.Interno)">
-                    @foreach (var p in proovedor)
+                    @foreach (var o in operario)
                     {
-                        <MudSelectItem Value="@p.Id">@p.Nombre</MudSelectItem>
+                        <MudSelectItem Value="@((int?)o.Id)">@o.NombreCompleto</MudSelectItem>
                     }
                 </MudSelect>
 
@@ -38,9 +40,7 @@
                            Required="@(modelo.tipoIngreso == TipoIngreso.Proveedor)">
                     @foreach (var p in proovedor)
                     {
-                        <MudSelectItem Value="@((int?)p.Id)">
-                            @p.Nombre
-                        </MudSelectItem>
+                        <MudSelectItem Value="@((int?)p.Id)">@p.Nombre</MudSelectItem>
                     }
                 </MudSelect>
 
@@ -52,7 +52,7 @@
 
                 <MudButton Variant="Variant.Filled"
                            Color="Color.Primary"
-                           OnClick="Ingresar"
+                           OnClick="Ingresar",
                            Disabled="Guardando"
                            Class="mt-4">
                     @(Guardando ? "Procesando..." : "Registrar Ingreso")
@@ -78,15 +78,43 @@
     private bool GuardandoProveedor;
     private string? ErrorProovedor;
 
+    //Operario
+    private List<OperarioResponse> operario = new();
+    private bool GuardandoOperario;
+    private string? ErrorOperario;
+
+    [Parameter]
+    public EventCallback IngresoActivoCard { get; set; }
+
     //Tengo que llamar a la lista de camiones, operarios y proveedores desde el servicio para poder hacer el llamado aca asi cargo el proceso.
     protected override async Task OnInitializedAsync()
     {
-        // await LoadCamionIdAsync();
-        // await LoadOperarioIdAsync();
-        await LoadProveedorIdAsync();
+        await LoadOperarioAsync();
+        await LoadProveedorAsync();
     }
 
-    private async Task LoadProveedorIdAsync()
+    private async Task LoadProveedorAsync()
+    {
+        GuardandoOperario = true;
+        ErrorOperario = null;
+
+        try
+        {
+            var lista = await operarioApi.GetAllOperariosHabilitados();
+
+            operario = lista.ToList();
+        }
+        catch (HttpApiException ex)
+        {
+            ErrorOperario = ex.Message;
+        }
+        finally
+        {
+            GuardandoOperario = false;
+        }
+    }
+
+    private async Task LoadOperarioAsync()
     {
         GuardandoProveedor = true;
         ErrorProovedor = null;
@@ -138,7 +166,7 @@
             };
 
             await ingresoApi.RegistrarIngreso(request);
-
+            await IngresoActivoCard.InvokeAsync();
         }
         catch (HttpApiException ex)
         {
