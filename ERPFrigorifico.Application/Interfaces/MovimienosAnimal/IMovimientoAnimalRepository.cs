@@ -6,6 +6,6 @@ namespace ERPFrigorifico.Application.Interfaces.MovimienosAnimal
     public interface IMovimientoAnimalRepository
     {
         Task<(List<MovimientoAnimal> Items, int TotalCount)> GetMovimientosPaginados(int pageIndex, int pageSize, TipoMovimiento? tipoMovimiento);
-        Task<List<Animal>> GetAnimalesPorUltimoMovimiento(TipoMovimiento TipoMovimiento);
+        Task<List<Animal>> GetAnimalesPorUltimoMovimiento(List<int> AnimalIds, TipoMovimiento TipoMovimiento);
     }
 }

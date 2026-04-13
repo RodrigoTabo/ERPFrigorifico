@@ -1,6 +1,8 @@
-﻿@using ERPFrigorifico.Client.ApiClients
-@inject MovimientoAnimalApi movimientoAnimalApi
+﻿@inject MovimientoAnimalApi movimientoAnimalApi
+@inject CorralApi corralApi
+@using ERPFrigorifico.Client.ApiClients
 @using ERPFrigorifico.Client.Extensiones
+@using ERPFrigorifico.Shared.DTOs
 @using ERPFrigorifico.Shared.DTOs.MovimientosAnimales
 @using ERPFrigorifico.Shared.Enums
 @rendermode InteractiveServer
@@ -8,7 +10,6 @@
 
 <MudCard elevation="0" Style="border-radius: 5px;">
     <MudCardContent>
-
         <div class="pa-4">
             <MudSelect T="TipoMovimiento?" Label="Filtrar por Tipo" Value="tipoMovimiento" ValueChanged="OnFiltroChanged" Clearable="true"
                        Placeholder="Todos los movimientos">
@@ -19,52 +20,144 @@
             </MudSelect>
         </div>
 
-        <MudTable ServerData="@(new Func<TableState, CancellationToken, Task<TableData<MovimientoAnimalResponse>>>(TableData))"
-                  Hover="true" Dense="true" Elevation="0" @ref="Table" Loading="@Loading">
-
+        <MudTable ServerData="TableData"
+                  Hover="true" Dense="true"
+                  Elevation="0" @ref="Table"
+                  Loading="@Loading"
+                  T="MovimientoAnimalResponse">
             <HeaderContent>
+                <MudTh>
+                    <MudCheckBox T="bool"
+                                 Size="Size.Small"
+                                 Value="@CheckAllEstado()"
+                                 ValueChanged="@((bool val) => SeleccionarTodo(val))"
+                                 Label="Todo" />
+                </MudTh>
                 <MudTh>Fecha</MudTh>
                 <MudTh>Estado</MudTh>
                 <MudTh Style="text-align:center">Acciones</MudTh>
             </HeaderContent>
 
             <RowTemplate>
+                <MudTd DataLabel="Seleccionar">
+                    <MudCheckBox T="bool"
+                                 Value="@selectedIds.Contains(context.animalId)"
+                                 Disabled="@(!EsSeleccionable(context))"
+                                 ValueChanged="@((bool val) => OnManualCheck(context, val))"
+                                 Color="Color.Primary" />
+                </MudTd>
                 <MudTd DataLabel="Fecha">@context.FechaMovimiento.ToString("dd/MM/yyyy HH:mm")</MudTd>
                 <MudTd DataLabel="Estado">
-                    <MudChip T="string"
-                             Color="@GetColor(context.tipoMovimiento)"
-                             Size="Size.Small"
-                             Variant="Variant.Text">
-                        @(context.tipoMovimiento switch
-                        {
-                            TipoMovimiento.Ingreso => "Recién ingresado",
-                            TipoMovimiento.EntradaCorral when context.CorralId > 0 => "En Corral",
-                            TipoMovimiento.Faena when context.FaenaId > 0 => "En Faena",
-                            TipoMovimiento.SalidaCorral => "Saliendo del corral",
-                            TipoMovimiento m => m.ToString(),
-                            _ => "Movimiento Nulo"
-                        })
+                    <MudChip T="string" Color="@GetColor(context.tipoMovimiento)" Size="Size.Small" Variant="Variant.Text">
+                        @GetEstadoTexto(context)
                     </MudChip>
                 </MudTd>
                 <MudTd DataLabel="Acciones" Style="text-align:center">
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small">
-                        Marcar Salida
-                    </MudButton>
+                    @if (selectedIds.Count <= 0)
+                    {
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" @onclick="() => RealizarAccion(context)">
+                            @GetLabel(context)
+                        </MudButton>
+                    }
                 </MudTd>
             </RowTemplate>
             <PagerContent>
+                @if (selectedIds.Count > 0)
+                {
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" @onclick="() => RealizarAccion(null)">
+                        Enviar todo lo seleccionado.
+                    </MudButton>
+                }
                 <MudTablePager RowsPerPageString="Registros por página:" />
             </PagerContent>
         </MudTable>
     </MudCardContent>
 </MudCard>
 
-@code {
 
+@foreach (var id in selectedIds)
+{
+    <h1>ID Seleccionado: @id</h1>
+}
+
+@code {
     private MudTable<MovimientoAnimalResponse> Table;
+    private PagedResult<MovimientoAnimalResponse>? guardarLista;
     private TipoMovimiento? tipoMovimiento;
+    private TipoMovimiento? tipoBloqueado = null;
     private bool Loading;
-    private string? Error;
+    private List<int> selectedIds = new();
+    private bool loadingAccion;
+    private string? errorAccion;
+
+    //Determina si todos los elementos seleccionables (segun tipo bloqueado)
+    //estan actualmente seleccionados, para reflejar correctamente el estado del checkbox global.
+    private bool CheckAllEstado()
+    {
+        if (guardarLista?.Items == null || !guardarLista.Items.Any())
+            return false;
+
+        var itemsElegibles = guardarLista.Items.Where(x => EsSeleccionable(x)).ToList();
+
+        return itemsElegibles.Any() && itemsElegibles.All(x => selectedIds.Contains(x.animalId));
+    }
+
+    //Gestiona la seleccion individual asegurando que,
+    //una vez seleccionado un tipo de movimiento, todas las selecciones posteriores respeten ese mismo tipo.
+    private void OnManualCheck(MovimientoAnimalResponse item, bool isChecked)
+    {
+        if (isChecked)
+        {
+            if (!selectedIds.Any())
+                tipoBloqueado = item.tipoMovimiento;
+            if (item.tipoMovimiento == tipoBloqueado)
+                selectedIds.Add(item.animalId);
+        }
+        else
+        {
+            selectedIds.Remove(item.animalId);
+            if (!selectedIds.Any()) tipoBloqueado = null;
+        }
+    }
+
+    //Define si un elemento puede ser seleccionado en función del tipo bloqueado actual,
+    //evitando mezclar tipos de movimiento en una misma seleccion.”
+    private bool EsSeleccionable(MovimientoAnimalResponse item)
+    {
+        if (!selectedIds.Any())
+            return true;
+        return item.tipoMovimiento == tipoBloqueado;
+    }
+
+    //Realiza seleccion masiva basada en el primer elemento visible para definir un tipo de movimiento homogeneo,
+    //garantizando que la seleccion respete la restricción de no mezclar tipos.”
+    private void SeleccionarTodo(bool isChecked)
+    {
+        var itemsEnPagina = guardarLista?.Items;
+
+        if (itemsEnPagina == null)
+            return;
+
+        if (isChecked)
+        {
+            if (tipoBloqueado == null && itemsEnPagina.Any())
+                tipoBloqueado = itemsEnPagina.First().tipoMovimiento;
+
+            foreach (var item in itemsEnPagina.Where(x => x.tipoMovimiento == tipoBloqueado))
+            {
+                selectedIds.Add(item.animalId);
+            }
+        }
+        else
+        {
+            foreach (var item in itemsEnPagina)
+            {
+                selectedIds.Remove(item.animalId);
+            }
+            if (!selectedIds.Any()) tipoBloqueado = null;
+        }
+        StateHasChanged();
+    }
 
     private async Task<TableData<MovimientoAnimalResponse>> TableData(TableState state, CancellationToken token)
     {
@@ -72,17 +165,12 @@
         try
         {
             var resultado = await movimientoAnimalApi.GetAllMovimientosAnimales(state.Page, state.PageSize, tipoMovimiento);
-
-            return new TableData<MovimientoAnimalResponse>()
-            {
-                TotalItems = resultado.TotalCount,
-                Items = resultado.Items
-            };
+            guardarLista = resultado;
+            return new TableData<MovimientoAnimalResponse>() { TotalItems = resultado.TotalCount, Items = resultado.Items };
         }
-        catch (HttpApiException ex)
+        catch
         {
-            Error = ex.Message;
-            return new TableData<MovimientoAnimalResponse>() { Items = new List<MovimientoAnimalResponse>(), TotalItems = 0 };
+            return new TableData<MovimientoAnimalResponse>();
         }
         finally
         {
@@ -91,12 +179,49 @@
         }
     }
 
+    private async Task RealizarAccion(MovimientoAnimalResponse? item)
+    {
+        loadingAccion = true;
+        errorAccion = null;
+        try
+        {
+            if (selectedIds.Count <= 0)
+                selectedIds.Add(item.animalId);
+
+            var enviarMovimiento = await movimientoAnimalApi.EnviarAnimales(selectedIds);
+
+        }
+        catch (HttpApiException ex)
+        {
+            errorAccion = ex.Message;
+        }
+        finally
+        {
+            loadingAccion = false;
+        }
+    }
+
     private async Task OnFiltroChanged(TipoMovimiento? nuevoTipo)
     {
         tipoMovimiento = nuevoTipo;
-        // Esto reinicia la tabla a la pagina 0 y llama a ReloadData
         await Table.ReloadServerData();
     }
+
+    private string GetEstadoTexto(MovimientoAnimalResponse context) => context.tipoMovimiento switch
+    {
+        TipoMovimiento.Ingreso => "Recién ingresado",
+        TipoMovimiento.EntradaCorral when context.CorralId > 0 => "En Corral",
+        TipoMovimiento.Faena when context.FaenaId > 0 => "En Faena",
+        _ => context.tipoMovimiento.ToString()
+    };
+
+    private string GetLabel(MovimientoAnimalResponse context) => context.tipoMovimiento switch
+    {
+        TipoMovimiento.Ingreso => "Despachar a corral",
+        TipoMovimiento.EntradaCorral => "Despachar faena",
+        TipoMovimiento.Faena => "Enviar a procesar",
+        _ => "Ver detalle"
+    };
 
     private Color GetColor(TipoMovimiento? tipo) => tipo switch
     {

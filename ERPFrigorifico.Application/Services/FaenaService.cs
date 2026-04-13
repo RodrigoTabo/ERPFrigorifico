@@ -14,33 +14,18 @@ namespace ERPFrigorifico.Application.Services
         IUnitOfWorkRepository unitOfWorkRepository) : IFaenaService
     {
 
-        private readonly IAnimalRepository _animalRepository = animalRepository;
         private readonly IFaenaRepository _faenaRepository = faenaRepository;
-        private readonly IMovimientoAnimalRepository _movimientoAnimalRepository = movimientoAnimalRepository;
         private readonly IUnitOfWorkRepository _unitOfWorkRepository = unitOfWorkRepository;
 
-        public async Task EnviarAnimalesAFaena(List<int> animalIds)
+        public async Task EnviarAnimalesAFaena(List<Animal> animalesEnCorral)
         {
-            var animales = await _animalRepository.GetByIds(animalIds);
-
-            //Le mandamos los objetos animales y los animales seleccionados para poder validar si los animales existen.
-            ValidarAnimalExistente(animales, animalIds);
-
-            var animalesEnCorral = await _movimientoAnimalRepository.GetAnimalesPorUltimoMovimiento(TipoMovimiento.EntradaCorral);
-
-            var animalesEnCorralesIds = animalesEnCorral.Select(a => a.Id).ToList();
-
-            var hayInvalidos = animalIds.Any(id => !animalesEnCorralesIds.Contains(id));
-
-            //Si hay algun animal que no este en corral, lanzamos una excepcion
-            ValidarAnimalesEnCorral(hayInvalidos);
 
             var faena = new Faena
             {
                 FechaProduccion = DateTime.UtcNow
             };
 
-            foreach (var animal in animales)
+            foreach (var animal in animalesEnCorral)
             {
                 animal.Faena = faena;
 
@@ -83,11 +68,6 @@ namespace ERPFrigorifico.Application.Services
 
 
         // Metodos Privados de validacion.
-        private void ValidarAnimalExistente(List<Animal> animales, List<int> animalIds)
-        {
-            if (animales.Count != animalIds.Count)
-                throw new NotFoundException("Algunos animales no existen");
-        }
 
         private async Task<Faena> ValidarFaenaExistente(int faenaId)
         {
@@ -111,10 +91,6 @@ namespace ERPFrigorifico.Application.Services
                 throw new ConflictException("La faena no tiene animales asociados");
         }
 
-        private void ValidarAnimalesEnCorral(bool hayInvalidos)
-        {
-            if (hayInvalidos)
-                throw new ConflictException("Algunos animales no están en corral");
-        }
+
     }
 }

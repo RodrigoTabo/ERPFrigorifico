@@ -16,7 +16,7 @@ namespace ERPFrigorifico.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> EnviarAnimalesAFaena([FromBody] List<int> animalIds)
         {
-            await _faenaService.EnviarAnimalesAFaena(animalIds);
+            //await _faenaService.EnviarAnimalesAFaena(animalIds);
             return Ok("Los animales han sido enviado a la faena exitosamente.");
         }
 

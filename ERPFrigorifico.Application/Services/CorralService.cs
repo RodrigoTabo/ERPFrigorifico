@@ -25,10 +25,10 @@ namespace ERPFrigorifico.Application.Services
             validarExistenciaAnimales(animales, animalIds);
 
             var animalesEnIngreso = await _movimientoAnimalRepository
-                .GetAnimalesPorUltimoMovimiento(TipoMovimiento.Ingreso);
+                .GetAnimalesPorUltimoMovimiento(animalIds, TipoMovimiento.Ingreso);
 
             var animalYaEnCorral = await _movimientoAnimalRepository
-                .GetAnimalesPorUltimoMovimiento(TipoMovimiento.EntradaCorral);
+                .GetAnimalesPorUltimoMovimiento(animalIds, TipoMovimiento.EntradaCorral);
 
             var animalesEnIngresoIds = animalesEnIngreso.Select(a => a.Id).ToList();
 

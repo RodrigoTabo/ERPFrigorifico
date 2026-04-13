@@ -1,7 +1,6 @@
 ﻿using ERPFrigorifico.Application.Interfaces.MovimienosAnimal;
 using ERPFrigorifico.Domain.Entities;
 using ERPFrigorifico.Infrastructure.Data;
-using ERPFrigorifico.Shared.DTOs.MovimientosAnimales;
 using ERPFrigorifico.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,12 +16,15 @@ namespace ERPFrigorifico.Infrastructure.Repositories
 
             var query = _context.MovimientosAnimal
                 .AsNoTracking()
-                .Where(m => !tipoMovimiento.HasValue || m.TipoMovimiento == tipoMovimiento);
+                .Where(m => !tipoMovimiento.HasValue || m.TipoMovimiento == tipoMovimiento)
+                                .Where(m => m.FechaMovimiento == _context.MovimientosAnimal
+                    .Where(x => x.AnimalId == m.AnimalId)
+                    .Max(x => x.FechaMovimiento));
 
             int totalCount = await query.CountAsync();
 
             var items = await query
-                .OrderByDescending(m => m.FechaMovimiento) 
+                .OrderByDescending(m => m.FechaMovimiento)
                 .Skip(pageIndex * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -32,14 +34,16 @@ namespace ERPFrigorifico.Infrastructure.Repositories
 
 
         // Este metodo obtiene una lista de animales cuyo ultimo movimiento coincide con el tipo de movimiento especificado.
-        public async Task<List<Animal>> GetAnimalesPorUltimoMovimiento(TipoMovimiento tipo)
+        public async Task<List<Animal>> GetAnimalesPorUltimoMovimiento(List<int> animalSeleccionado, TipoMovimiento tipo)
         {
+
             var animalesIds = await _context.MovimientosAnimal
+                .Where(a => animalSeleccionado.Contains(a.AnimalId))
                 .Where(m => m.FechaMovimiento == _context.MovimientosAnimal
                     .Where(x => x.AnimalId == m.AnimalId)
                     .Max(x => x.FechaMovimiento))
                 .Where(m => m.TipoMovimiento == tipo)
-                .Select(m => m.AnimalId)
+                .Select(a => a.AnimalId)
                 .ToListAsync();
 
             return await _context.Animales
