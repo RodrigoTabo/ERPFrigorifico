@@ -1,6 +1,7 @@
 ﻿using ERPFrigorifico.Application.Interfaces.MovimienosAnimal;
 using ERPFrigorifico.Domain.Entities;
 using ERPFrigorifico.Infrastructure.Data;
+using ERPFrigorifico.Shared.DTOs.MovimientosAnimales;
 using ERPFrigorifico.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
 
@@ -50,5 +51,11 @@ namespace ERPFrigorifico.Infrastructure.Repositories
                 .Where(a => animalesIds.Contains(a.Id))
                 .ToListAsync();
         }
+
+        public async Task<List<MovimientoAnimalByIdResponse>> GetHistorialAnimalById(int id)
+            => await _context.MovimientosAnimal.Select(m => new MovimientoAnimalByIdResponse
+            { AnimalId = m.AnimalId, FechaMovimiento = m.FechaMovimiento, TipoMovimiento = m.TipoMovimiento }).Where(a => a.AnimalId == id).ToListAsync();
+
+
     }
 }

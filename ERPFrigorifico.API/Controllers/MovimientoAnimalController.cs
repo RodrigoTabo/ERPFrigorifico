@@ -18,7 +18,14 @@ namespace ERPFrigorifico.API.Controllers
         public async Task<ActionResult<PagedResult<MovimientoAnimalResponse>>> GetAllMovimientosAnimales(int pageIndex, int pageSize, TipoMovimiento? tipoMovimiento)
             => Ok(await _movimientoAnimalService.GetAllMovimientosAnimales(pageIndex, pageSize, tipoMovimiento));
 
+        [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<List<MovimientoAnimalByIdResponse>>> GetHistorialAnimalById(int id)
+            => Ok(await _movimientoAnimalService.GetHistorialAnimalById(id));
+
+
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult> EnviarAnimales(List<int> animalIds)
             => Ok(_movimientoAnimalService.EnviarAnimales(animalIds));
     }

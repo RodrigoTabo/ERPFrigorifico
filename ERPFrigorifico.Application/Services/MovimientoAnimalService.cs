@@ -71,6 +71,13 @@ namespace ERPFrigorifico.Application.Services
 
         }
 
+        public async Task<List<MovimientoAnimalByIdResponse>> GetHistorialAnimalById(int id)
+        {
+            var obtener = await _movimientoAnimalRepository.GetHistorialAnimalById(id);
+            return obtener.ToList();
+        }
+   
+
         //Metodos privados de validacion
 
         private void ValidarAnimalesEnCorral(bool hayInvalidos)
@@ -84,5 +91,6 @@ namespace ERPFrigorifico.Application.Services
             if (animales.Count != animalIds.Count)
                 throw new NotFoundException("Algunos animales no existen");
         }
+
     }
 }
