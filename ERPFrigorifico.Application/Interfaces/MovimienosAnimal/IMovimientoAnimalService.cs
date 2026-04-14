@@ -10,7 +10,6 @@ namespace ERPFrigorifico.Application.Interfaces.MovimienosAnimal
     {
         Task<PagedResult<MovimientoAnimalResponse>> GetAllMovimientosAnimales(int pageIndex, int pageSize, TipoMovimiento? tipoMovimiento);
         Task EnviarAnimales(List<int> animalIds);
-
         Task<List<MovimientoAnimalByIdResponse>> GetHistorialAnimalById(int id);
     }
 }

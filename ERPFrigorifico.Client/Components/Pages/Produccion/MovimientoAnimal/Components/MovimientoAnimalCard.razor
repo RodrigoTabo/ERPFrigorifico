@@ -1,5 +1,6 @@
 ﻿@inject MovimientoAnimalApi movimientoAnimalApi
 @inject CorralApi corralApi
+@inject IDialogService DialogService
 @using ERPFrigorifico.Client.ApiClients
 @using ERPFrigorifico.Client.Extensiones
 @using ERPFrigorifico.Shared.DTOs
@@ -53,12 +54,15 @@
                     </MudChip>
                 </MudTd>
                 <MudTd DataLabel="Acciones" Style="text-align:center">
-                    @if (selectedIds.Count <= 0)
-                    {
-                        <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" @onclick="() => RealizarAccion(context)">
-                            @GetLabel(context)
-                        </MudButton>
-                    }
+                    <MudStack Row="true" Spacing="2" Justify="Justify.Center">
+                        @if (selectedIds.Count <= 0)
+                        {
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" @onclick="() => RealizarAccion(context)">
+                                @GetLabel(context)
+                            </MudButton>
+                        }
+                        <MudIconButton @onclick="() => OpenDialogAsync(context.animalId)" Variant="Variant.Filled" Color="Color.Primary" Icon="@Icons.Material.Filled.History"></MudIconButton>
+                    </MudStack>
                 </MudTd>
             </RowTemplate>
             <PagerContent>
@@ -205,6 +209,16 @@
     {
         tipoMovimiento = nuevoTipo;
         await Table.ReloadServerData();
+    }
+
+
+    
+    private Task OpenDialogAsync(int id)
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        var parameters = new DialogParameters { ["AnimalId"] = id };
+
+        return DialogService.ShowAsync<MovimientoAnimalDialog>("Ver historial", parameters);
     }
 
     private string GetEstadoTexto(MovimientoAnimalResponse context) => context.tipoMovimiento switch
