@@ -13,37 +13,24 @@ namespace ERPFrigorifico.Application.Services
         IUnitOfWorkRepository unitOfWorkRepository) : ICorralService
     {
 
-        private readonly IAnimalRepository _animalRepository = animalRepository;
-        private readonly IMovimientoAnimalRepository _movimientoAnimalRepository = movimientoAnimalRepository;
         private readonly IUnitOfWorkRepository _unitOfWorkRepository = unitOfWorkRepository;
+        private readonly IAnimalRepository _animalRepository = animalRepository;
 
-        public async Task EnviarAnimalesACorral(List<int> animalIds, int corralId)
+        public async Task EnviarAnimalesACorral(List<int> animalesEnIngreso)
         {
 
-            var animales = await _animalRepository.GetByIds(animalIds);
+            var animalIds = await _animalRepository.GetByIds(animalesEnIngreso);
+            var animalesEnIngresoIds = animalIds.Select(a => a.Id).ToList();
+            var hayInvalidosEnIngreso = animalesEnIngreso.Any(id => !animalesEnIngresoIds.Contains(id));
 
-            validarExistenciaAnimales(animales, animalIds);
+            validarAnimalesEnIngreso(hayInvalidosEnIngreso);
 
-            var animalesEnIngreso = await _movimientoAnimalRepository
-                .GetAnimalesPorUltimoMovimiento(animalIds, TipoMovimiento.Ingreso);
-
-            var animalYaEnCorral = await _movimientoAnimalRepository
-                .GetAnimalesPorUltimoMovimiento(animalIds, TipoMovimiento.EntradaCorral);
-
-            var animalesEnIngresoIds = animalesEnIngreso.Select(a => a.Id).ToList();
-
-            //Verificamos si hay algun animal que no este en ingreso, si ya se movio a corral, tambien sirve como filtro.
-            var hayInvalidos = animalIds.Any(id => !animalesEnIngresoIds.Contains(id));
-
-            //Si hay algun animal que no este en ingreso, lanzamos una excepcion
-            validarAnimalesEnIngreso(hayInvalidos);
-
-            foreach (var animal in animales)
+            foreach (var animal in animalIds)
             {
                 var movimiento = new MovimientoAnimal
                 {
                     AnimalId = animal.Id,
-                    CorralId = corralId,
+                    CorralId = 1,
                     TipoMovimiento = TipoMovimiento.EntradaCorral,
                     FechaMovimiento = DateTime.UtcNow
                 };
@@ -55,17 +42,11 @@ namespace ERPFrigorifico.Application.Services
 
         }
 
-        private void validarExistenciaAnimales(List<Animal> animales, List<int> animalIds)
-        {
-            if (animales.Count != animalIds.Count)
-                throw new NotFoundException("Algunos animales no existen");
-        }
-
+        //Metodos privados
         private void validarAnimalesEnIngreso(bool hayInvalidos)
         {
             if (hayInvalidos)
                 throw new ConflictException("Algunos animales no están en ingreso");
         }
-
     }
 }

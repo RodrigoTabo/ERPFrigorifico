@@ -1,6 +1,7 @@
 ﻿
 using ERPFrigorifico.Application.Exceptions;
 using ERPFrigorifico.Application.Interfaces.Animales;
+using ERPFrigorifico.Application.Interfaces.Corrales;
 using ERPFrigorifico.Application.Interfaces.Faenas;
 using ERPFrigorifico.Application.Interfaces.MovimienosAnimal;
 using ERPFrigorifico.Domain.Entities;
@@ -13,12 +14,14 @@ namespace ERPFrigorifico.Application.Services
     public class MovimientoAnimalService(
         IMovimientoAnimalRepository movimientoAnimalRepository,
         IAnimalRepository animalRepository,
+        ICorralService corralService,
         IFaenaService faenaService
         ) : IMovimientoAnimalService
     {
 
         private readonly IAnimalRepository _animalRepository = animalRepository;
         private readonly IFaenaService _faenaService = faenaService;
+        private readonly ICorralService _corralService = corralService;
         private readonly IMovimientoAnimalRepository _movimientoAnimalRepository = movimientoAnimalRepository;
         public async Task<PagedResult<MovimientoAnimalResponse>> GetAllMovimientosAnimales(int pageIndex, int pageSize, TipoMovimiento? tipoMovimiento)
         {
@@ -42,33 +45,29 @@ namespace ERPFrigorifico.Application.Services
             };
         }
 
+        //Estoy llevando los animales del corral a la faena para ser procesados, me falta llevarlos desde ingresos hasta el corral, y despues ahi si. 
         public async Task EnviarAnimales(List<int> animalIds)
         {
-            var animales = await _animalRepository.GetByIds(animalIds);
+            ////Proceso de validacion general
+            //var animales = await _animalRepository.GetByIds(animalIds);
 
-            ValidarAnimalExistente(animales, animalIds);
+            //ValidarAnimalExistente(animales, animalIds);
 
-            var entradaCorral = await _movimientoAnimalRepository.GetAnimalesPorUltimoMovimiento(animalIds, TipoMovimiento.EntradaCorral);
+            var ingreso = await _movimientoAnimalRepository
+                .GetAnimalesPorUltimoMovimiento(animalIds, TipoMovimiento.Ingreso);
 
-            var animalesEnCorralesIds = entradaCorral.Select(a => a.Id).ToList();
+            var entradaCorral = await _movimientoAnimalRepository
+                .GetAnimalesPorUltimoMovimiento(animalIds, TipoMovimiento.EntradaCorral);
 
-            var hayInvalidos = animalIds.Any(id => !animalesEnCorralesIds.Contains(id));
-            var Faena = await _movimientoAnimalRepository.GetAnimalesPorUltimoMovimiento(animalIds, TipoMovimiento.Faena);
-
-            //Si hay algun animal que no este en corral, lanzamos una excepcion
-            ValidarAnimalesEnCorral(hayInvalidos);
-
-
-            if (entradaCorral is not null)
+            if (ingreso.Any())
             {
-               await _faenaService.EnviarAnimalesAFaena(entradaCorral);
-
-            }
-            else if (_movimientoAnimalRepository.GetAnimalesPorUltimoMovimiento(animalIds, TipoMovimiento.Ingreso) is not null)
-            {
-                //Enviar a algun lado que todavia no tengo especificado.
+                await _corralService.EnviarAnimalesACorral(ingreso);
             }
 
+            if (entradaCorral.Any())
+            {
+                await _faenaService.EnviarAnimalesAFaena(entradaCorral);
+            }
         }
 
         public async Task<List<MovimientoAnimalByIdResponse>> GetHistorialAnimalById(int id)
@@ -76,15 +75,9 @@ namespace ERPFrigorifico.Application.Services
             var obtener = await _movimientoAnimalRepository.GetHistorialAnimalById(id);
             return obtener.ToList();
         }
-   
+
 
         //Metodos privados de validacion
-
-        private void ValidarAnimalesEnCorral(bool hayInvalidos)
-        {
-            if (hayInvalidos)
-                throw new ConflictException("Algunos animales no están en corral");
-        }
 
         private void ValidarAnimalExistente(List<Animal> animales, List<int> animalIds)
         {

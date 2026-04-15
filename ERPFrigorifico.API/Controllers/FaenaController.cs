@@ -10,24 +10,54 @@ namespace ERPFrigorifico.API.Controllers
     {
         private readonly IFaenaService _faenaService = faenaService;
 
-        [HttpPost("/enviar-animales")]
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<List<FaenaResponse>>> GetAllFaenas()
+            => Ok(await _faenaService.GetAllFaenas());
+
+        [HttpGet("proceso")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<FaenaResponse>> GetFaenaEnProceso()
+            => Ok(await _faenaService.GetFaenaEnProceso());
+
+        //[HttpPost("/enviar-animales")]
+        //[ProducesResponseType(StatusCodes.Status200OK)]
+        //[ProducesResponseType(StatusCodes.Status409Conflict)]
+        //[ProducesResponseType(StatusCodes.Status404NotFound)]
+        //public async Task<IActionResult> EnviarAnimalesAFaena([FromBody] List<int> animalIds)
+        //{
+        //    await _faenaService.EnviarAnimalesAFaena(List<animalIds>);
+        //    return Ok("Los animales han sido enviado a la faena exitosamente.");
+        //}
+
+        [HttpPost("{id}/procesar")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> EnviarAnimalesAFaena([FromBody] List<int> animalIds)
+        public async Task<IActionResult> ProcesarFaena(int id)
         {
-            //await _faenaService.EnviarAnimalesAFaena(animalIds);
-            return Ok("Los animales han sido enviado a la faena exitosamente.");
+            await _faenaService.ProcesarFaena(id);
+            return Ok("La faena ha comenzado con exito.");
         }
 
-        [HttpPost("/procesar-faena")]
+        [HttpPost("{id}/terminar")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> ProcesarFaena([FromBody] ProcesarFaenaRequest request)
+        public async Task<IActionResult> TerminarFaena(int id)
+        {
+            await _faenaService.TerminarFaena(id);
+            return Ok("La faena ha comenzado con exito.");
+        }
+
+        [HttpPut]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> TerminarFaena([FromBody] ProcesarFaenaRequest request)
         {
             await _faenaService.ProcesarFaena(request.faenaId);
-            return Ok("La faena ha comenzado con exito.");
+            return Ok("La faena ha terminado con exito.");
         }
     }
 }

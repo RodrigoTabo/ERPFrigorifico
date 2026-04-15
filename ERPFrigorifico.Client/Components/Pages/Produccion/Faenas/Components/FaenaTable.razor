@@ -1,0 +1,46 @@
+﻿@using ERPFrigorifico.Client.ApiClients
+@using ERPFrigorifico.Client.Extensiones
+@using ERPFrigorifico.Shared.DTOs.Faenas
+@inject FaenaApi faenaApi
+
+<MudTable Items="@items.Take(5)" Hover="true" Breakpoint="Breakpoint.Sm" Loading="@Loading" LoadingProgressColor="Color.Info">
+    <HeaderContent>
+        <MudTh>Fecha de produccion</MudTh>
+        <MudTh>Tipo de estado</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Fecha de produccion">@context.FechaProduccion</MudTd>
+        <MudTd DataLabel="Tipo de estado">@context.TipoFaena.ToString()</MudTd>
+    </RowTemplate>
+</MudTable>
+
+
+@code {
+    private bool Loading;
+    private string? Error;
+    private List<FaenaResponse> items = new List<FaenaResponse>();
+
+    protected override async Task OnInitializedAsync()
+        => await CargarFaena();
+
+    private async Task CargarFaena()
+    {
+        Loading = true;
+        Error = null;
+
+        try
+        {
+            items = await faenaApi.GetAllFaena();
+        }
+        catch (HttpApiException ex)
+        {
+            Error = ex.Message;
+        }
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+
+}

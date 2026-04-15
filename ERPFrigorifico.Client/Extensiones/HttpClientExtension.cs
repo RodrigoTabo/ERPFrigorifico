@@ -20,19 +20,29 @@
             throw await HttpApiException.FromHttpResponse(resp);
         }
 
-        public static async Task<TResp> PostJsonOrThrowAsync<TReq, TResp>(this HttpClient http, string url, TReq body)
+        public static async Task<TResp?> PostJsonOrThrowAsync<TReq, TResp>(this HttpClient http, string url, TReq body)
         {
             var resp = await http.PostAsJsonAsync(url, body);
 
             if (resp.IsSuccessStatusCode)
             {
-                var data = await resp.Content.ReadFromJsonAsync<TResp>();
+                var data = await resp.Content.ReadFromJsonAsync<TResp?>();
                 if (data is null)
                     throw new HttpApiException("La API devolvió una respuesta vacía.");
 
                 return data;
             }
             throw await HttpApiException.FromHttpResponse(resp);
+        }
+
+
+        //Cree este nuevo post para poder enviar una accion POST a la DB sin esperar un response.
+        public static async Task PostOrThrowAsync<TReq>(this HttpClient http, string url, TReq body)
+        {
+            var resp = await http.PostAsJsonAsync(url, body);
+
+            if (!resp.IsSuccessStatusCode)
+                throw await HttpApiException.FromHttpResponse(resp);
         }
 
         public static async Task<TResp> PutJsonOrThrowAsync<TReq, TResp>(this HttpClient http, string url, TReq body)

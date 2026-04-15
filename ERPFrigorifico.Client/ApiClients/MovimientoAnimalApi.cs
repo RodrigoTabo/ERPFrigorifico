@@ -27,14 +27,9 @@ namespace ERPFrigorifico.Client.ApiClients
             => await _httpClient.GetJsonOrThrowAsync<List<MovimientoAnimalByIdResponse>>($"api/movimientosanimales/{id}");
 
 
-        public async Task<int> EnviarAnimales(List<int> animalIds)
-        {
-            var enviar = await _httpClient.PostJsonOrThrowAsync
-                 <List<int>, CreatedIdResponse>
-                 ($"api/movimientosanimales", animalIds);
+        public async Task EnviarAnimales(List<int> animalIds)
+           => await _httpClient.PostOrThrowAsync($"api/movimientosanimales", animalIds);
 
-            return enviar.Id;
-        }
 
         private class CreatedIdResponse
         {

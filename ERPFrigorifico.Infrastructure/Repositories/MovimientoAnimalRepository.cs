@@ -35,27 +35,21 @@ namespace ERPFrigorifico.Infrastructure.Repositories
 
 
         // Este metodo obtiene una lista de animales cuyo ultimo movimiento coincide con el tipo de movimiento especificado.
-        public async Task<List<Animal>> GetAnimalesPorUltimoMovimiento(List<int> animalSeleccionado, TipoMovimiento tipo)
-        {
-
-            var animalesIds = await _context.MovimientosAnimal
-                .Where(a => animalSeleccionado.Contains(a.AnimalId))
+        public async Task<List<int>> GetAnimalesPorUltimoMovimiento(List<int> animalSeleccionado, TipoMovimiento tipo)
+            => await _context.MovimientosAnimal
+                .Where(m => animalSeleccionado.Contains(m.AnimalId))
                 .Where(m => m.FechaMovimiento == _context.MovimientosAnimal
                     .Where(x => x.AnimalId == m.AnimalId)
                     .Max(x => x.FechaMovimiento))
                 .Where(m => m.TipoMovimiento == tipo)
-                .Select(a => a.AnimalId)
+                .Select(m => m.AnimalId)
                 .ToListAsync();
 
-            return await _context.Animales
-                .Where(a => animalesIds.Contains(a.Id))
-                .ToListAsync();
-        }
+
 
         public async Task<List<MovimientoAnimalByIdResponse>> GetHistorialAnimalById(int id)
             => await _context.MovimientosAnimal.Select(m => new MovimientoAnimalByIdResponse
             { AnimalId = m.AnimalId, FechaMovimiento = m.FechaMovimiento, TipoMovimiento = m.TipoMovimiento }).Where(a => a.AnimalId == id).ToListAsync();
-
 
     }
 }

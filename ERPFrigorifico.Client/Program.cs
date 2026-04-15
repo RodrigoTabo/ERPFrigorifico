@@ -29,6 +29,7 @@ namespace ERPFrigorifico.Client
 
 
             builder.Services.AddScoped<IngresoApi>();
+            builder.Services.AddScoped<FaenaApi>();
             builder.Services.AddScoped<CorralApi>();
             builder.Services.AddScoped<ProveedorApi>();
             builder.Services.AddScoped<OperarioApi>();

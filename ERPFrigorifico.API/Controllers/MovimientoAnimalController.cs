@@ -25,8 +25,10 @@ namespace ERPFrigorifico.API.Controllers
 
 
         [HttpPost]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult> EnviarAnimales(List<int> animalIds)
-            => Ok(_movimientoAnimalService.EnviarAnimales(animalIds));
+        public async Task<IActionResult> EnviarAnimales(List<int> animalIds)
+        {
+            await _movimientoAnimalService.EnviarAnimales(animalIds);
+            return Ok();
+        }
     }
 }
